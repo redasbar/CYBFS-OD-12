@@ -1,0 +1,1192 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - LibraTech Bookstore{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <div class="cart-header">
+        <h1>Shopping Cart</h1>
+        <p class="cart-subtitle">Review your items and proceed to checkout</p>
+    </div>
+
+    <div class="cart-content">
+        {% if cart_items %}
+        <div class="cart-grid">
+            <!-- Cart Items -->
+            <div class="cart-items-section">
+                <div class="cart-items">
+                    <!-- Cart items will be loaded via JavaScript -->
+                    <div class="loading-cart">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading your cart...</p>
+                    </div>
+                </div>
+                
+                <!-- Cart Actions -->
+                <div class="cart-actions">
+                    <div class="cart-continue">
+                        <a href="{{ url_for('books') }}" class="btn-continue">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </a>
+                    </div>
+                    <div class="cart-clear">
+                        <button class="btn-clear" id="clear-cart">
+                            <i class="fas fa-trash"></i> Clear Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <div class="summary-card">
+                    <h2>Order Summary</h2>
+                    
+                    <div class="summary-details" id="cart-summary">
+                        <div class="summary-line">
+                            <span>Subtotal (<span id="item-count">0</span> items)</span>
+                            <span id="subtotal">€0.00</span>
+                        </div>
+                        <div class="summary-line">
+                            <span>Shipping</span>
+                            <span id="shipping">FREE</span>
+                        </div>
+                        <div class="summary-line">
+                            <span>Tax</span>
+                            <span id="tax">€0.00</span>
+                        </div>
+                        
+                        <div class="summary-divider"></div>
+                        
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span class="total-price" id="total">€0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-note">
+                        <p><i class="fas fa-shipping-fast"></i> Free shipping on orders over €25</p>
+                        <p><i class="fas fa-undo"></i> 30-day return policy</p>
+                    </div>
+                    
+                    <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-checkout" id="checkout-btn">
+                        Proceed to Checkout
+                    </a>
+                    
+                    <div class="payment-methods">
+                        <i class="fab fa-cc-visa"></i>
+                        <i class="fab fa-cc-mastercard"></i>
+                        <i class="fab fa-cc-amex"></i>
+                        <i class="fab fa-cc-paypal"></i>
+                    </div>
+                </div>
+                
+                <!-- Promo Code -->
+                <div class="promo-section">
+                    <h3>Have a promo code?</h3>
+                    <div class="promo-input">
+                        <input type="text" id="promo-code" placeholder="Enter code">
+                        <button class="btn-apply" id="apply-promo">Apply</button>
+                    </div>
+                    <div class="promo-suggestions">
+                        <span class="promo-suggestion" data-code="WELCOME10">WELCOME10 - 10% off first order</span>
+                        <span class="promo-suggestion" data-code="FREESHIP">FREESHIP - Free shipping</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added any books to your cart yet.</p>
+            <div class="empty-cart-actions">
+                <a href="{{ url_for('books') }}" class="btn btn-primary">
+                    <i class="fas fa-book"></i> Browse Books
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Return Home
+                </a>
+            </div>
+            <div class="empty-cart-recommendations">
+                <h3>Popular Books You Might Like</h3>
+                <div class="recommended-books">
+                    <!-- Recommended books will be loaded via JavaScript -->
+                    <div class="loading-recommendations">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading recommendations...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.cart-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.cart-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.cart-header h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.cart-subtitle {
+    color: var(--text-light);
+    font-size: 18px;
+}
+
+/* Cart Grid */
+.cart-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+/* Cart Items Section */
+.cart-items-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.cart-items {
+    min-height: 200px;
+}
+
+.loading-cart {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+}
+
+.loading-cart i {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+}
+
+/* Cart Item */
+.cart-item {
+    display: grid;
+    grid-template-columns: 100px 2fr 1fr;
+    gap: 20px;
+    padding: 25px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item:hover {
+    background-color: rgba(0,0,0,0.01);
+}
+
+.item-image {
+    width: 100px;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.cart-item:hover .item-image img {
+    transform: scale(1.05);
+}
+
+.item-details h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: var(--text-color);
+}
+
+.item-details h3 a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.item-details h3 a:hover {
+    color: var(--accent-color);
+}
+
+.item-author {
+    margin: 0 0 10px 0;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.item-stock {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.item-stock.in-stock {
+    color: var(--success-color);
+}
+
+.item-stock.low-stock {
+    color: #ffc107;
+}
+
+.item-stock.out-of-stock {
+    color: var(--error-color);
+}
+
+.item-actions {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.btn-wishlist, .btn-remove {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 0;
+    transition: var(--transition);
+}
+
+.btn-remove {
+    color: var(--error-color);
+}
+
+.btn-wishlist:hover {
+    color: #115d8a;
+    text-decoration: underline;
+}
+
+.btn-remove:hover {
+    color: #bd2130;
+    text-decoration: underline;
+}
+
+/* Item Price */
+.item-price {
+    text-align: right;
+}
+
+.price-quantity {
+    margin-bottom: 15px;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.qty-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.qty-btn:hover {
+    background-color: var(--light-color);
+    border-color: var(--accent-color);
+}
+
+.qty-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quantity-controls input {
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.quantity-controls input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.unit-price {
+    font-size: 14px;
+    color: var(--text-light);
+    display: block;
+}
+
+.item-total {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* Cart Actions */
+.cart-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-continue {
+    color: var(--accent-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.btn-continue:hover {
+    background-color: rgba(20, 110, 180, 0.1);
+}
+
+.btn-clear {
+    background: none;
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-clear:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Empty Cart */
+.empty-cart {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+}
+
+.empty-cart-icon {
+    font-size: 80px;
+    color: var(--border-color);
+    margin-bottom: 30px;
+}
+
+.empty-cart h2 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-size: 28px;
+}
+
+.empty-cart p {
+    color: var(--text-light);
+    margin-bottom: 30px;
+    font-size: 16px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-cart-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+.btn-outline {
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 12px 24px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition);
+}
+
+.btn-outline:hover {
+    background-color: var(--light-color);
+}
+
+.empty-cart-recommendations {
+    margin-top: 50px;
+    padding-top: 50px;
+    border-top: 1px solid var(--border-color);
+}
+
+.empty-cart-recommendations h3 {
+    margin-bottom: 30px;
+    color: var(--text-color);
+    font-size: 20px;
+}
+
+.recommended-books {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.loading-recommendations {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+/* Order Summary */
+.order-summary {
+    position: sticky;
+    top: 20px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.summary-card h2 {
+    margin-bottom: 25px;
+    font-size: 20px;
+    color: var(--text-color);
+}
+
+.summary-details {
+    margin-bottom: 25px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-size: 15px;
+}
+
+.summary-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 20px 0;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.total-price {
+    color: var(--accent-color);
+    font-size: 24px;
+}
+
+.summary-note {
+    background-color: var(--light-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.summary-note p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.summary-note i {
+    color: var(--accent-color);
+    width: 20px;
+}
+
+.btn-checkout {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.payment-methods {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 24px;
+    color: var(--text-light);
+    margin-top: 20px;
+}
+
+/* Promo Section */
+.promo-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.promo-section h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.promo-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.promo-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.promo-input input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.btn-apply {
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-apply:hover {
+    background-color: #115d8a;
+}
+
+.promo-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.promo-suggestion {
+    font-size: 12px;
+    color: var(--accent-color);
+    cursor: pointer;
+    padding: 8px 12px;
+    background-color: rgba(20, 110, 180, 0.1);
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.promo-suggestion:hover {
+    background-color: rgba(20, 110, 180, 0.2);
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .cart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-summary {
+        position: static;
+        margin-top: 40px;
+    }
+    
+    .cart-item {
+        grid-template-columns: 80px 1fr;
+    }
+    
+    .item-price {
+        grid-column: 1 / -1;
+        text-align: left;
+        margin-top: 20px;
+    }
+    
+    .price-quantity {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .quantity-controls {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-container {
+        padding: 10px;
+    }
+    
+    .cart-items-section {
+        padding: 20px;
+    }
+    
+    .item-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .cart-actions {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .btn-clear {
+        justify-content: center;
+    }
+    
+    .empty-cart-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .empty-cart-actions a {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+/* Animation for cart updates */
+@keyframes itemAdded {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.item-updated {
+    animation: itemAdded 0.3s ease;
+}
+
+/* Message styles */
+.cart-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+}
+
+.cart-message.success {
+    background-color: var(--success-color);
+}
+
+.cart-message.error {
+    background-color: var(--error-color);
+}
+
+.cart-message.info {
+    background-color: var(--accent-color);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Cart management system
+class CartManager {
+    constructor() {
+        this.cart = this.loadCart();
+        this.init();
+    }
+    
+    init() {
+        this.renderCart();
+        this.setupEventListeners();
+        this.updateCartCount();
+    }
+    
+    loadCart() {
+        const cartData = localStorage.getItem('libratech_cart');
+        return cartData ? JSON.parse(cartData) : [];
+    }
+    
+    saveCart() {
+        localStorage.setItem('libratech_cart', JSON.stringify(this.cart));
+        this.updateCartCount();
+    }
+    
+    addItem(bookId, quantity = 1) {
+        const existingItem = this.cart.find(item => item.bookId === bookId);
+        
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            this.cart.push({
+                bookId: bookId,
+                quantity: quantity,
+                addedAt: new Date().toISOString()
+            });
+        }
+        
+        this.saveCart();
+        this.showMessage('Book added to cart!', 'success');
+    }
+    
+    removeItem(bookId) {
+        this.cart = this.cart.filter(item => item.bookId !== bookId);
+        this.saveCart();
+        this.showMessage('Book removed from cart', 'info');
+        this.renderCart();
+    }
+    
+    updateQuantity(bookId, quantity) {
+        if (quantity <= 0) {
+            this.removeItem(bookId);
+            return;
+        }
+        
+        const item = this.cart.find(item => item.bookId === bookId);
+        if (item) {
+            item.quantity = quantity;
+            this.saveCart();
+            this.renderCart();
+        }
+    }
+    
+    clearCart() {
+        this.cart = [];
+        this.saveCart();
+        this.showMessage('Cart cleared', 'info');
+        this.renderCart();
+    }
+    
+    getItemCount() {
+        return this.cart.reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    async getCartDetails() {
+        if (this.cart.length === 0) {
+            return { items: [], subtotal: 0, tax: 0, total: 0 };
+        }
+        
+        try {
+            // Fetch book details for items in cart
+            const bookIds = this.cart.map(item => item.bookId);
+            const response = await fetch(`/api/cart/books?ids=${bookIds.join(',')}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch cart details');
+            }
+            
+            const books = await response.json();
+            
+            // Match books with cart quantities
+            const items = this.cart.map(cartItem => {
+                const book = books.find(b => b.id === cartItem.bookId);
+                return book ? {
+                    ...cartItem,
+                    book: book,
+                    total: book.price * cartItem.quantity
+                } : null;
+            }).filter(item => item !== null);
+            
+            // Calculate totals
+            const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+            const shipping = subtotal > 25 ? 0 : 5.99;
+            const tax = subtotal * 0.1; // 10% tax
+            const total = subtotal + shipping + tax;
+            
+            return {
+                items: items,
+                subtotal: subtotal,
+                shipping: shipping,
+                tax: tax,
+                total: total,
+                itemCount: this.getItemCount()
+            };
+            
+        } catch (error) {
+            console.error('Error loading cart details:', error);
+            return { items: [], subtotal: 0, tax: 0, total: 0, itemCount: 0 };
+        }
+    }
+    
+    async renderCart() {
+        const cartContainer = document.querySelector('.cart-items');
+        const cartSummary = document.getElementById('cart-summary');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const emptyCart = document.querySelector('.empty-cart');
+        
+        if (!cartContainer) return;
+        
+        if (this.cart.length === 0) {
+            // Show empty cart state
+            if (emptyCart) {
+                emptyCart.style.display = 'block';
+            }
+            
+            if (cartContainer) {
+                cartContainer.innerHTML = '';
+                cartContainer.closest('.cart-grid').style.display = 'none';
+            }
+            
+            // Load recommendations for empty cart
+            this.loadRecommendations();
+            return;
+        }
+        
+        // Hide empty cart state
+        if (emptyCart) {
+            emptyCart.style.display = 'none';
+        }
+        
+        // Show cart grid
+        if (cartContainer.closest('.cart-grid')) {
+            cartContainer.closest('.cart-grid').style.display = 'grid';
+        }
+        
+        // Show loading state
+        cartContainer.innerHTML = `
+            <div class="loading-cart">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading your cart...</p>
+            </div>
+        `;
+        
+        // Load cart details
+        const cartDetails = await this.getCartDetails();
+        
+        // Render cart items
+        if (cartDetails.items.length === 0) {
+            cartContainer.innerHTML = `
+                <div class="empty-cart-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Unable to load cart items. Please try again.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        cartContainer.innerHTML = cartDetails.items.map(item => `
+            <div class="cart-item" data-book-id="${item.bookId}">
+                <div class="item-image">
+                    <a href="/book/${item.book.id}">
+                        <img src="${item.book.image || '/static/images/book-placeholder.jpg'}" 
+                             alt="${item.book.title}">
+                    </a>
+                </div>
+                
+                <div class="item-details">
+                    <h3>
+                        <a href="/book/${item.book.id}">${item.book.title}</a>
+                    </h3>
+                    <p class="item-author">${item.book.author}</p>
+                    <p class="item-stock ${item.book.stock < item.quantity ? 'out-of-stock' : 
+                                          item.book.stock < 5 ? 'low-stock' : 'in-stock'}">
+                        ${item.book.stock >= item.quantity ? 'In Stock' : 
+                          `Only ${item.book.stock} available`}
+                    </p>
+                    
+                    <div class="item-actions">
+                        <button class="btn-wishlist" data-book-id="${item.bookId}">
+                            <i class="far fa-heart"></i> Save for later
+                        </button>
+                        <button class="btn-remove" data-book-id="${item.bookId}">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="item-price">
+                    <div class="price-quantity">
+                        <div class="quantity-controls">
+                            <button class="qty-btn minus" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                            <input type="number" value="${item.quantity}" min="1" max="${item.book.stock || 99}">
+                            <button class="qty-btn plus" ${item.quantity >= (item.book.stock || 99) ? 'disabled' : ''}>+</button>
+                        </div>
+                        <span class="unit-price">€${item.book.price.toFixed(2)} each</span>
+                    </div>
+                    <div class="item-total">
+                        €${item.total.toFixed(2)}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Update summary
+        if (cartSummary) {
+            document.getElementById('item-count').textContent = cartDetails.itemCount;
+            document.getElementById('subtotal').textContent = `€${cartDetails.subtotal.toFixed(2)}`;
+            document.getElementById('shipping').textContent = cartDetails.shipping === 0 ? 'FREE' : `€${cartDetails.shipping.toFixed(2)}`;
+            document.getElementById('tax').textContent = `€${cartDetails.tax.toFixed(2)}`;
+            document.getElementById('total').textContent = `€${cartDetails.total.toFixed(2)}`;
+        }
+        
+        // Enable/disable checkout button
+        if (checkoutBtn) {
+            const hasOutOfStock = cartDetails.items.some(item => item.book.stock < item.quantity);
+            if (hasOutOfStock) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.title = 'Some items are out of stock';
+                checkoutBtn.style.opacity = '0.5';
+                checkoutBtn.style.cursor = 'not-allowed';
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.title = '';
+                checkoutBtn.style.opacity = '1';
+                checkoutBtn.style.cursor = 'pointer';
+            }
+        }
+        
+        // Reattach event listeners
+        this.setupCartItemListeners();
+    }
+    
+    setupEventListeners() {
+        // Clear cart button
+        const clearBtn = document.getElementById('clear-cart');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (this.cart.length > 0 && confirm('Clear all items from cart?')) {
+                    this.clearCart();
+                }
+            });
+        }
+        
+        // Promo code
+        const applyPromoBtn = document.getElementById('apply-promo');
+        const promoInput = document.getElementById('promo-code');
+        
+        if (applyPromoBtn && promoInput) {
+            applyPromoBtn.addEventListener('click', () => this.applyPromoCode(promoInput.value));
+            promoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.applyPromoCode(promoInput.value);
+            });
+        }
+        
+        // Promo suggestions
+        document.querySelectorAll('.promo-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', () => {
+                const code = suggestion.getAttribute('data-code');
+                if (promoInput) promoInput.value = code;
+                this.applyPromoCode(code);
+            });
+        });
+    }
+    
+    setupCartItemListeners() {
+        // Quantity buttons
+        document.querySelectorAll('.qty-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const cartItem = e.target.closest('.cart-item');
+                const bookId = cartItem.getAttribute('data-book-id');
+                const input = cartItem.querySelector('input[type="number"]');
+                let quantity = parseInt(input.value);
+                
+                if (e.target.classList.contains('minus')) {
+                    quantity--;
+                } else if (e.target.classList.contains('plus')) {
+                    quantity++;
+                }
+                
+                this.updateQuantity(bookId, quantity);
+            });
+        });
+        
+        // Quantity input changes
+        document.querySelectorAll('.cart-item input[type="number"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const cartItem = e.target.closest('.cart-item');
+                const bookId = cartItem.getAttribute('data-book-id');
+                const quantity = parseInt(e.target.value);
+                
+                this.updateQuantity(bookId, quantity);
+            });
+        });
+        
+        // Remove buttons
+        document.querySelectorAll('.btn-remove').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const bookId = e.target.closest('.btn-remove').getAttribute('data-book-id');
+                this.removeItem(bookId);
+            });
+        });
+        
+        // Wishlist buttons
+        document.querySelectorAll('.btn-wishlist').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const bookId = e.target.closest('.btn-wishlist').getAttribute('data-book-id');
+                this.addToWishlist(bookId);
+            });
+        });
+    }
+    
+    async loadRecommendations() {
+        const recommendationsContainer = document.querySelector('.recommended-books');
+        if (!recommendationsContainer) return;
+        
+        try {
+            const response = await fetch('/api/books?limit=4');
+            if (response.ok) {
+                const books = await response.json();
+                
+                recommendationsContainer.innerHTML = books.map(book => `
+                    <div class="recommended-book">
+                        <div class="rec-image">
+                            <img src="${book.image || '/static/images/book-placeholder.jpg'}" 
+                                 alt="${book.title}">
+                        </div>
+                        <div class="rec-info">
+                            <h4>${book.title}</h4>
+                            <p>${book.author}</p>
+                            <div class="rec-price">€${book.price.toFixed(2)}</div>
+                            <button class="btn-add-to-cart" data-book-id="${book.id}">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add event listeners to add to cart buttons
+                document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const bookId = e.target.closest('.btn-add-to-cart').getAttribute('data-book-id');
+                        this.addItem(bookId);
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Error loading recommendations:', error);
+        }
+    }
+    
+    applyPromoCode(code) {
+        if (!code.trim()) {
+            this.showMessage('Please enter a promo code', 'error');
+            return;
+        }
+        
+        // Simulate promo code validation
+        const validCodes = {
+            'WELCOME10': { discount: 0.1, type: 'percentage' },
+            'FREESHIP': { discount: 5.99, type: 'shipping' }
+        };
+        
+        if (validCodes[code]) {
+            this.showMessage(`Promo code "${code}" applied!`, 'success');
+        } else {
+            this.showMessage('Invalid promo code', 'error');
+        }
+    }
+    
+    addToWishlist(bookId) {
+        // Here you would implement wishlist functionality
+        this.showMessage('Added to wishlist!', 'success');
+    }
+    
+    updateCartCount() {
+        const count = this.getItemCount();
+        const cartCountElement = document.querySelector('.cart-count');
+        
+        if (cartCountElement) {
+            if (count > 0) {
+                cartCountElement.textContent = count;
+                cartCountElement.style.display = 'flex';
+            } else {
+                cartCountElement.style.display = 'none';
+            }
+        }
+    }
+    
+    showMessage(message, type = 'info') {
+        // Remove existing messages
+        const existingMsg = document.querySelector('.cart-message');
+        if (existingMsg) existingMsg.remove();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `cart-message ${type}`;
+        messageDiv.textContent = message;
+        
+        document.body.appendChild(messageDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => messageDiv.remove(), 500);
+        }, 3000);
+    }
+}
+
+// Initialize cart manager when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    window.cartManager = new CartManager();
+});
+</script>
+{% endblock %}

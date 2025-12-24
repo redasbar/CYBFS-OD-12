@@ -1,10 +1,6 @@
-CREATE DATABASE LibraTech_db;
-USE LibraTech_db;
-
-CREATE TABLE genres (
-    genre_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    PRIMARY KEY (genre_id)
+CREATE TABLE IF NOT EXISTS genres (
+    genre_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 INSERT INTO genres (name) VALUES
@@ -33,14 +29,14 @@ INSERT INTO genres (name) VALUES
     ('Science-fiction & Fantasy'),
     ('Développement personnel'),
     ('Sports & Plein air'),
-    ('Voyages');
+    ('Voyages')
+ON CONFLICT (name) DO NOTHING;
 
-CREATE TABLE authors (
-    author_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS authors (
+    author_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    bio TEXT,
-    PRIMARY KEY (author_id)
+    bio TEXT
 );
 
 INSERT INTO authors (first_name, last_name, bio) VALUES
@@ -54,118 +50,102 @@ INSERT INTO authors (first_name, last_name, bio) VALUES
     ('Nicolas', 'Mathieu', 'Prix Goncourt 2018 pour ses romans sur la France périurbaine'),
     ('Kaouther', 'Adimi', 'Écrivaine algérienne francophone primée pour ses romans sur l''héritage culturel');
 
-CREATE TABLE books (
-    book_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS books (
+    book_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    price DECIMAL(10, 2) UNSIGNED NOT NULL, -- Handles prices up to 99999999.99
-    stock_quantity INT UNSIGNED NOT NULL DEFAULT 0,
-    author_id INT UNSIGNED NOT NULL,
-    genre_id INT UNSIGNED NOT NULL,
-    isbn VARCHAR(17) UNIQUE, -- e.g., 978-3-16-148410-0
+    price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+    stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+    author_id INTEGER NOT NULL,
+    genre_id INTEGER NOT NULL,
+    isbn VARCHAR(17) UNIQUE,
     published_date DATE,
-    PRIMARY KEY (book_id),
+    image_url VARCHAR(500) DEFAULT '/static/images/book-placeholder.jpg',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE RESTRICT
 );
 
 INSERT INTO books (title, description, price, stock_quantity, author_id, genre_id, isbn, published_date) VALUES
-    -- Roman Noir Littéraire
     ('Le Mystère de la Chambre Bleue', 'Un polar psychologique dans un manoir bourguignon, entre secrets familiaux et tableau maudit', 21.90, 12, 1, 16, '978-2-266-31234-5', '2021-03-18'),
-    
-    -- Littérature Contemporaine
     ('L''Étourdissement', 'Roman poétique sur un homme qui fuit Paris pour devenir gardien de phare en Bretagne', 19.50, 8, 2, 13, '978-2-07-046789-2', '2019-09-05'),
-    
-    -- Fiction Historique
     ('Le Cœur de la Louve', 'Saga familiale sur trois générations de femmes dans les Ardennes du 19ème siècle', 23.90, 15, 3, 10, '978-2-253-19876-3', '2020-01-15'),
-    
-    -- Roman Psychologique
     ('Portrait d''après blessure', 'Enquête intime sur un père disparu, entre photographie et mémoire trouée', 20.50, 11, 4, 13, '978-2-266-30128-6', '2022-08-25'),
-    
-    -- Roman Social
     ('L''Amour et les Forêts', 'Histoire d''une femme qui reconstruit sa vie après une relation toxique, entre forêt vosgienne et renaissance', 22.90, 18, 5, 18, '978-2-07-046543-0', '2022-01-06'),
-    
-    -- Récit Contemporain
     ('Un Monde à Portée de Main', 'Roman sur une jeune femme qui crée des décors de cinéma, entre art et précarité', 21.50, 9, 6, 13, '978-2-7578-7456-3', '2021-05-19'),
-    
-    -- Fiction Métaphysique
     ('Tiens Ferme Ta Couronne', 'Road-trip initiatique d''un scénariste à New York, entre quête artistique et amitié improbable', 24.50, 7, 7, 13, '978-2-07-046987-2', '2023-02-16'),
-    
-    -- Roman Social
-    ('Connemara', 'Portrait d''une amitié entre deux quadragénaires dans l''est de la France, entre usine et rêves brisés', 19.90, 16, 9, 13, '978-2-330-13456-4', '2023-01-04'),
-    
-    -- Fiction Historique
-    ('Nos Richesses', 'Hommage à une librairie algérienne mythique et à la résistance culturelle', 18.90, 14, 10, 10, '978-2-07-274794-3', '2021-11-03');
+    ('Connemara', 'Portrait d''une amitié entre deux quadragénaires dans l''est de la France, entre usine et rêves brisés', 19.90, 16, 8, 13, '978-2-330-13456-4', '2023-01-04'),
+    ('Nos Richesses', 'Hommage à une librairie algérienne mythique et à la résistance culturelle', 18.90, 14, 9, 10, '978-2-07-274794-3', '2021-11-03')
+ON CONFLICT (isbn) DO NOTHING;
 
+-- Create ENUM types first
+CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'cancelled');
+CREATE TYPE payment_method_type AS ENUM ('credit_card', 'debit_card', 'paypal', 'bank_transfer', 'other');
+CREATE TYPE user_role AS ENUM ('manager', 'sales', 'supply', 'finance');
 
-
-CREATE TABLE customers (
-    customer_id BINARY(16) NOT NULL,
+-- Note: Fixed author_id values in books (8, 9 instead of 9, 10)
+-- Note: Using UUID instead of BINARY(16)
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL, -- Always store hashed passwords!
+    password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     shipping_address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (customer_id)
+    is_active BOOLEAN DEFAULT TRUE
 );
 
-INSERT INTO customers (email, first_name, last_name, shipping_address)
-VALUES
-    ('john.doe@yahoo.com', 'John', 'DOE', 'Broadway Avenue, Hollywood CA'),
-ON CONFLICT DO NOTHING; -- Prevents errors if run multiple times
+INSERT INTO customers (customer_id, email, password_hash, first_name, last_name, shipping_address) VALUES
+    (gen_random_uuid(), 'john.doe@yahoo.com', 'hashed_password_here', 'John', 'DOE', 'Broadway Avenue, Hollywood CA')
+ON CONFLICT (email) DO NOTHING;
 
-CREATE TABLE orders (
-    order_id BINARY(16) NOT NULL,
-    customer_id BINARY(16) NOT NULL,
+CREATE TABLE IF NOT EXISTS orders (
+    order_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total_amount DECIMAL(10, 2) UNSIGNED NOT NULL,
-    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-    PRIMARY KEY (order_id),
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+    status order_status DEFAULT 'pending',
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
 );
 
-CREATE TABLE order_items (
-    order_item_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    order_id BINARY(16) UNSIGNED NOT NULL,
-    book_id INT UNSIGNED NOT NULL,
-    quantity INT UNSIGNED NOT NULL DEFAULT 1,
-    unit_price DECIMAL(10, 2) UNSIGNED NOT NULL, -- Snapshot of price at time of purchase
-    PRIMARY KEY (order_item_id),
+CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id SERIAL PRIMARY KEY,
+    order_id UUID NOT NULL,
+    book_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    unit_price DECIMAL(10, 2) NOT NULL CHECK (unit_price >= 0),
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE payments (
-    payment_id BINARY(16) NOT NULL,
-    order_id BINARY(16) NOT NULL,
-    amount DECIMAL(10, 2) UNSIGNED NOT NULL, -- Amount charged for this payment (could be less than order total for partial payments/refunds)
-    provider_payment_id VARCHAR(255) NOT NULL UNIQUE, -- The token/provider_reference_id from your Payment Service Provider (e.g., 'pi_3LN...' from Stripe)
-    payment_gateway VARCHAR(50) NOT NULL, -- To track which gateway/processor you used (e.g., 'stripe', 'braintree')
-    payment_method ENUM('credit_card', 'debit_card', 'paypal', 'bank_transfer', 'other') NOT NULL, -- e.g., 'credit_card', 'paypal', 'bank_transfer'
-    status VARCHAR(50) NOT NULL, -- e.g., 'succeeded', 'failed', 'pending', 'refunded'
-    last_four_digits CHAR(4), -- The last 4 digits of the card for receipt/display purposes. This is PCI compliant.
-    card_brand VARCHAR(20), -- The card brand (e.g., 'visa', 'mastercard'). Also PCI compliant.
+CREATE TABLE IF NOT EXISTS payments (
+    payment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL CHECK (amount >= 0),
+    provider_payment_id VARCHAR(255) NOT NULL UNIQUE,
+    payment_gateway VARCHAR(50) NOT NULL,
+    payment_method payment_method_type NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    last_four_digits CHAR(4),
+    card_brand VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    processed_at TIMESTAMP NULL, -- Timestamp when the payment was processed by the gateway.
-    PRIMARY KEY (payment_id),
+    processed_at TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE RESTRICT
 );
 
--- Add an index for faster lookups by the provider's ID
-CREATE INDEX idx_provider_payment_id ON payments(provider_payment_id);
+CREATE INDEX IF NOT EXISTS idx_provider_payment_id ON payments(provider_payment_id);
 
-CREATE TABLE users (
-    user_id BINARY(16) NOT NULL,
+CREATE TABLE IF NOT EXISTS users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    role ENUM('manager', 'sales', 'supply', 'finance') NOT NULL,
+    role user_role NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 

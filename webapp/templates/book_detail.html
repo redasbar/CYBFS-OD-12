@@ -1,0 +1,909 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - LibraTech Bookstore{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ url_for('index') }}">Home</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="{{ url_for('books') }}">Books</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="{{ url_for('books', genre=book.genre_id) }}">{{ book.genre.name }}</a>
+        <i class="fas fa-chevron-right"></i>
+        <span>{{ book.title }}</span>
+    </nav>
+
+    <!-- Book Details -->
+    <div class="book-detail">
+        <div class="book-detail-grid">
+            <!-- Book Image -->
+            <div class="book-image-large">
+                <img src="{{ book.image_url if book.image_url else '/static/images/book-placeholder.jpg' }}" 
+                     alt="{{ book.title }}" id="main-book-image">
+                {% if not book.in_stock %}
+                <div class="stock-badge out-of-stock">Out of Stock</div>
+                {% elif book.stock_quantity < 5 %}
+                <div class="stock-badge low-stock">Only {{ book.stock_quantity }} left</div>
+                {% else %}
+                <div class="stock-badge in-stock">In Stock</div>
+                {% endif %}
+            </div>
+
+            <!-- Book Info -->
+            <div class="book-info-detail">
+                <h1>{{ book.title }}</h1>
+                
+                <div class="book-meta-detail">
+                    <div class="author-info">
+                        <span>By </span>
+                        <a href="#" class="author-link">{{ book.author.full_name }}</a>
+                    </div>
+                    
+                    <div class="rating-section">
+                        <div class="stars">
+                            {% for i in range(5) %}
+                            <i class="fas fa-star {% if i < 4 %}filled{% endif %}"></i>
+                            {% endfor %}
+                            <span class="rating-score">4.5</span>
+                            <span class="rating-count">(128 reviews)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="genre-tags">
+                        <span class="genre-tag">{{ book.genre.name }}</span>
+                        {% if book.published_date %}
+                        <span class="year-tag">{{ book.published_date.year }}</span>
+                        {% endif %}
+                        <span class="isbn-tag">ISBN: {{ book.isbn }}</span>
+                    </div>
+                </div>
+
+                <div class="price-section">
+                    <div class="current-price">{{ book.formatted_price }}</div>
+                    {% if book.stock_quantity > 0 %}
+                    <div class="shipping-info">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>Free shipping on orders over €25</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="description-section">
+                    <h3>Description</h3>
+                    <p>{{ book.description }}</p>
+                </div>
+
+                <div class="action-section">
+                    {% if book.in_stock %}
+                    <div class="quantity-selector">
+                        <label for="quantity">Quantity:</label>
+                        <div class="quantity-controls">
+                            <button class="qty-btn minus">-</button>
+                            <input type="number" id="quantity" value="1" min="1" max="{{ book.stock_quantity }}">
+                            <button class="qty-btn plus">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-add-to-cart" data-book-id="{{ book.book_id }}">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-secondary btn-buy-now">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                        <button class="btn btn-outline btn-wishlist">
+                            <i class="far fa-heart"></i> Add to Wishlist
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="out-of-stock-actions">
+                        <button class="btn btn-secondary" disabled>
+                            <i class="fas fa-bell"></i> Notify When Available
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="far fa-heart"></i> Add to Wishlist
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="product-details">
+                    <h3>Product Details</h3>
+                    <ul>
+                        {% if book.published_date %}
+                        <li><strong>Published:</strong> {{ book.published_date.strftime('%B %d, %Y') }}</li>
+                        {% endif %}
+                        <li><strong>Genre:</strong> {{ book.genre.name }}</li>
+                        <li><strong>Author:</strong> {{ book.author.full_name }}</li>
+                        {% if book.isbn %}
+                        <li><strong>ISBN:</strong> {{ book.isbn }}</li>
+                        {% endif %}
+                        <li><strong>Stock:</strong> {{ book.stock_status }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="book-sidebar">
+                <div class="sidebar-card">
+                    <h3>Delivery Options</h3>
+                    <div class="delivery-option">
+                        <i class="fas fa-shipping-fast"></i>
+                        <div>
+                            <strong>Standard Delivery</strong>
+                            <p>3-5 business days • Free on orders over €25</p>
+                        </div>
+                    </div>
+                    <div class="delivery-option">
+                        <i class="fas fa-bolt"></i>
+                        <div>
+                            <strong>Express Delivery</strong>
+                            <p>1-2 business days • €5.99</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Secure Payment</h3>
+                    <div class="payment-methods">
+                        <i class="fab fa-cc-visa"></i>
+                        <i class="fab fa-cc-mastercard"></i>
+                        <i class="fab fa-cc-amex"></i>
+                        <i class="fab fa-cc-paypal"></i>
+                    </div>
+                    <p class="security-note">
+                        <i class="fas fa-lock"></i>
+                        Secure SSL encryption
+                    </p>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Customer Support</h3>
+                    <p><i class="fas fa-phone"></i> 24/7 Support Available</p>
+                    <p><i class="fas fa-undo"></i> 30-Day Return Policy</p>
+                    <p><i class="fas fa-shield-alt"></i> 1-Year Warranty</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Author Bio -->
+    {% if book.author.bio %}
+    <section class="author-bio">
+        <h2>About the Author</h2>
+        <div class="author-bio-content">
+            <div class="author-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="author-info">
+                <h3>{{ book.author.full_name }}</h3>
+                <p>{{ book.author.bio }}</p>
+                <a href="#" class="author-more">View all books by this author →</a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Related Books -->
+    {% if related_books %}
+    <section class="related-books">
+        <div class="section-header">
+            <h2>Related Books</h2>
+            <a href="{{ url_for('books', genre=book.genre_id) }}" class="view-all">
+                View All in {{ book.genre.name }} <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="books-grid">
+            {% for related_book in related_books %}
+            <div class="book-card">
+                <div class="book-image">
+                    <a href="{{ url_for('book_detail', book_id=related_book.book_id) }}">
+                        <img src="{{ related_book.image_url if related_book.image_url else '/static/images/book-placeholder.jpg' }}" 
+                             alt="{{ related_book.title }}">
+                    </a>
+                </div>
+                <div class="book-info">
+                    <h3>
+                        <a href="{{ url_for('book_detail', book_id=related_book.book_id) }}">{{ related_book.title }}</a>
+                    </h3>
+                    <p class="book-author">{{ related_book.author.full_name }}</p>
+                    <div class="book-footer">
+                        <span class="book-price">{{ related_book.formatted_price }}</span>
+                        <button class="btn-add-cart" data-book-id="{{ related_book.book_id }}"
+                                {% if not related_book.in_stock %}disabled{% endif %}>
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Reviews Section -->
+    <section class="reviews-section">
+        <h2>Customer Reviews</h2>
+        <div class="reviews-summary">
+            <div class="overall-rating">
+                <div class="rating-score-large">4.5</div>
+                <div class="stars-large">
+                    {% for i in range(5) %}
+                    <i class="fas fa-star filled"></i>
+                    {% endfor %}
+                </div>
+                <p>Based on 128 reviews</p>
+            </div>
+            
+            <div class="rating-breakdown">
+                <div class="rating-bar">
+                    <span>5 stars</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: 70%"></div>
+                    </div>
+                    <span>70%</span>
+                </div>
+                <div class="rating-bar">
+                    <span>4 stars</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: 20%"></div>
+                    </div>
+                    <span>20%</span>
+                </div>
+                <div class="rating-bar">
+                    <span>3 stars</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: 7%"></div>
+                    </div>
+                    <span>7%</span>
+                </div>
+                <div class="rating-bar">
+                    <span>2 stars</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: 2%"></div>
+                    </div>
+                    <span>2%</span>
+                </div>
+                <div class="rating-bar">
+                    <span>1 star</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: 1%"></div>
+                    </div>
+                    <span>1%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="write-review">
+            <h3>Write a Review</h3>
+            <form class="review-form">
+                <div class="rating-input">
+                    <span>Your Rating:</span>
+                    <div class="star-rating">
+                        {% for i in range(5, 0, -1) %}
+                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+                        <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <textarea placeholder="Share your thoughts about this book..." rows="4"></textarea>
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.breadcrumb a {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--accent-color);
+}
+
+.breadcrumb i {
+    font-size: 10px;
+    color: var(--border-color);
+}
+
+.book-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.book-image-large {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.book-image-large img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.stock-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.stock-badge.in-stock {
+    background-color: var(--success-color);
+}
+
+.stock-badge.low-stock {
+    background-color: #ffc107;
+    color: #856404;
+}
+
+.stock-badge.out-of-stock {
+    background-color: var(--error-color);
+}
+
+.book-info-detail h1 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.book-meta-detail {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.author-info {
+    margin-bottom: 15px;
+}
+
+.author-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.author-link:hover {
+    text-decoration: underline;
+}
+
+.rating-section {
+    margin-bottom: 15px;
+}
+
+.stars .filled {
+    color: #ffc107;
+}
+
+.rating-score {
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.rating-count {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.genre-tag, .year-tag, .isbn-tag {
+    padding: 4px 8px;
+    background-color: var(--light-color);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.year-tag {
+    background-color: #e3f2fd;
+    color: var(--accent-color);
+}
+
+.isbn-tag {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.price-section {
+    margin-bottom: 30px;
+}
+
+.current-price {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 10px;
+}
+
+.shipping-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--success-color);
+}
+
+.description-section {
+    margin-bottom: 30px;
+}
+
+.description-section h3 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.description-section p {
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+.action-section {
+    margin-bottom: 30px;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.qty-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    background-color: var(--light-color);
+}
+
+#quantity {
+    width: 60px;
+    height: 40px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.action-buttons, .out-of-stock-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-outline {
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--light-color);
+}
+
+.product-details h3 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.product-details ul {
+    list-style: none;
+    padding: 0;
+}
+
+.product-details li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.product-details li:last-child {
+    border-bottom: none;
+}
+
+.product-details strong {
+    display: inline-block;
+    width: 100px;
+    color: var(--text-light);
+}
+
+/* Sidebar */
+.sidebar-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-card h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--text-color);
+}
+
+.delivery-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.delivery-option:last-child {
+    border-bottom: none;
+}
+
+.delivery-option i {
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.delivery-option div p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.payment-methods {
+    display: flex;
+    gap: 15px;
+    font-size: 24px;
+    color: var(--text-light);
+    margin-bottom: 15px;
+}
+
+.security-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--success-color);
+    font-size: 14px;
+}
+
+.sidebar-card p {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-card i {
+    color: var(--accent-color);
+    width: 20px;
+}
+
+/* Author Bio */
+.author-bio {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 40px 0;
+    box-shadow: var(--shadow);
+}
+
+.author-bio h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.author-bio-content {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.author-avatar {
+    font-size: 60px;
+    color: var(--border-color);
+}
+
+.author-info h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.author-info p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.author-more {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.author-more:hover {
+    text-decoration: underline;
+}
+
+/* Related Books */
+.related-books {
+    margin: 60px 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    font-size: 24px;
+}
+
+.view-all {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.view-all:hover {
+    text-decoration: underline;
+}
+
+/* Reviews */
+.reviews-section {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 40px;
+    box-shadow: var(--shadow);
+}
+
+.reviews-section h2 {
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.reviews-summary {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.overall-rating {
+    text-align: center;
+}
+
+.rating-score-large {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.stars-large {
+    font-size: 24px;
+    color: #ffc107;
+    margin-bottom: 10px;
+}
+
+.rating-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bar-container {
+    flex: 1;
+    height: 8px;
+    background-color: var(--light-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    background-color: #ffc107;
+}
+
+.rating-bar span:first-child {
+    width: 60px;
+    text-align: right;
+}
+
+.rating-bar span:last-child {
+    width: 40px;
+    text-align: right;
+}
+
+.write-review h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.rating-input {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 5px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    cursor: pointer;
+    color: var(--border-color);
+    font-size: 24px;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+
+.review-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+@media (max-width: 992px) {
+    .book-detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .book-image-large {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .reviews-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-buttons, .out-of-stock-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .author-bio-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantity controls
+    const quantityInput = document.getElementById('quantity');
+    const minusBtn = document.querySelector('.qty-btn.minus');
+    const plusBtn = document.querySelector('.qty-btn.plus');
+    
+    if (minusBtn && plusBtn && quantityInput) {
+        minusBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
+        
+        plusBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            const max = parseInt(quantityInput.max) || 99;
+            if (value < max) {
+                quantityInput.value = value + 1;
+            }
+        });
+    }
+    
+    // Add to cart button
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function() {
+            const bookId = this.getAttribute('data-book-id');
+            const quantity = parseInt(quantityInput?.value || 1);
+            
+            // Add animation
+            this.innerHTML = '<i class="fas fa-check"></i> Added!';
+            this.style.backgroundColor = 'var(--success-color)';
+            
+            // Here you would call your cart API
+            console.log('Adding book', bookId, 'quantity', quantity, 'to cart');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+                this.style.backgroundColor = '';
+            }, 2000);
+        });
+    }
+    
+    // Star rating for reviews
+    const starInputs = document.querySelectorAll('.star-rating input');
+    starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            console.log('Selected rating:', this.value);
+        });
+    });
+});
+</script>
+{% endblock %}
