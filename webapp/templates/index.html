@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}LibraTech Bookstore - Your Online French Bookstore{% endblock %}
+{% block title %}LibraTech Librairie - Votre librairie en ligne française{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
         <div class="hero-content">
-            <h1>Discover Your Next Favorite Book</h1>
-            <p>Thousands of French and international books at your fingertips</p>
-            <a href="{{ url_for('books') }}" class="btn btn-primary">Browse Books</a>
+            <h1>Découvrez Votre Prochain Livre Préféré</h1>
+            <p>Des milliers de livres français et internationaux à portée de main</p>
+            <a href="{{ url_for('books') }}" class="btn btn-primary">Parcourir les Livres</a>
         </div>
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Books Collection">
+            <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Collection de Livres">
         </div>
     </div>
 </section>
@@ -20,7 +20,7 @@
 <!-- Featured Categories -->
 <section class="categories">
     <div class="container">
-        <h2>Browse by Category</h2>
+        <h2>Parcourir par Catégorie</h2>
         <div class="category-grid">
             {% for genre in genres %}
             <a href="{{ url_for('books', genre=genre.genre_id) }}" class="category-card">
@@ -48,8 +48,8 @@
 <section class="featured-books">
     <div class="container">
         <div class="section-header">
-            <h2>Featured Books</h2>
-            <a href="{{ url_for('books') }}" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+            <h2>Livres en Vedette</h2>
+            <a href="{{ url_for('books') }}" class="view-all">Voir Tout <i class="fas fa-arrow-right"></i></a>
         </div>
         
         <div class="books-grid">
@@ -58,7 +58,7 @@
                 <div class="book-image">
                     <img src="{{ book.image_url }}" alt="{{ book.title }}">
                     {% if not book.in_stock %}
-                    <span class="out-of-stock">Out of Stock</span>
+                    <span class="out-of-stock">Rupture de Stock</span>
                     {% endif %}
                 </div>
                 <div class="book-info">
@@ -87,9 +87,9 @@
 <!-- Call to Action -->
 <section class="cta">
     <div class="container">
-        <h2>Join Our Reading Community</h2>
-        <p>Get exclusive deals, recommendations, and updates on new releases</p>
-        <a href="{{ url_for('register') }}" class="btn btn-secondary">Sign Up Free</a>
+        <h2>Rejoignez Notre Communauté de Lecteurs</h2>
+        <p>Recevez des offres exclusives, des recommandations et des mises à jour sur les nouveautés</p>
+        <a href="{{ url_for('register') }}" class="btn btn-secondary">S'inscrire Gratuitement</a>
     </div>
 </section>
 
@@ -98,23 +98,23 @@
     <div class="container">
         <div class="feature">
             <i class="fas fa-shipping-fast"></i>
-            <h3>Free Shipping</h3>
-            <p>On orders over €25</p>
+            <h3>Livraison Gratuite</h3>
+            <p>Sur les commandes de plus de 25€</p>
         </div>
         <div class="feature">
             <i class="fas fa-undo-alt"></i>
-            <h3>Easy Returns</h3>
-            <p>30-day return policy</p>
+            <h3>Retours Faciles</h3>
+            <p>Politique de retour de 30 jours</p>
         </div>
         <div class="feature">
             <i class="fas fa-lock"></i>
-            <h3>Secure Payment</h3>
-            <p>100% secure transactions</p>
+            <h3>Paiement Sécurisé</h3>
+            <p>Transactions 100% sécurisées</p>
         </div>
         <div class="feature">
             <i class="fas fa-headset"></i>
-            <h3>24/7 Support</h3>
-            <p>Dedicated customer service</p>
+            <h3>Support 24/7</h3>
+            <p>Service client dédié</p>
         </div>
     </div>
 </section>

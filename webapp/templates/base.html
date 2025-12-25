@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}LibraTech Bookstore{% endblock %}</title>
+    <title>{% block title %}LibraTech Librairie{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% block extra_css %}{% endblock %}
 </head>
@@ -23,7 +23,7 @@
                 
                 <div class="search-bar">
                     <form action="{{ url_for('books') }}" method="GET">
-                        <input type="text" id="search-input" name="search" placeholder="Search for books, authors...">
+                        <input type="text" id="search-input" name="search" placeholder="Rechercher des livres, auteurs...">
                         <button type="submit"><i class="fas fa-search"></i></button>
                     </form>
                     <div class="search-results" id="search-results"></div>
@@ -41,33 +41,33 @@
                                 {{ current_user.first_name }}
                             </button>
                             <div class="dropdown-menu">
-                                <a href="#">My Account</a>
-                                <a href="#">My Orders</a>
-                                <a href="{{ url_for('logout') }}">Logout</a>
+                                <a href="#">Mon Compte</a>
+                                <a href="#">Mes Commandes</a>
+                                <a href="{{ url_for('logout') }}">Déconnexion</a>
                             </div>
                         </div>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="auth-btn">Sign In</a>
-                        <a href="{{ url_for('register') }}" class="auth-btn register">Register</a>
+                        <a href="{{ url_for('login') }}" class="auth-btn">Connexion</a>
+                        <a href="{{ url_for('register') }}" class="auth-btn register">Inscription</a>
                     {% endif %}
                 </div>
             </div>
             
             <nav class="navbar">
                 <ul>
-                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('index') }}">Accueil</a></li>
                     <li class="dropdown">
-                        <a href="#">Categories <i class="fas fa-chevron-down"></i></a>
+                        <a href="#">Catégories <i class="fas fa-chevron-down"></i></a>
                         <div class="dropdown-content">
                             {% for genre in genres[:10] %}
                                 <a href="{{ url_for('books', genre=genre.genre_id) }}">{{ genre.name }}</a>
                             {% endfor %}
                         </div>
                     </li>
-                    <li><a href="{{ url_for('books') }}">All Books</a></li>
-                    <li><a href="#">Best Sellers</a></li>
-                    <li><a href="#">New Releases</a></li>
-                    <li><a href="#">Deals</a></li>
+                    <li><a href="{{ url_for('books') }}">Tous les livres</a></li>
+                    <li><a href="#">Meilleures Ventes</a></li>
+                    <li><a href="#">Nouveautés</a></li>
+                    <li><a href="#">Promotions</a></li>
                 </ul>
             </nav>
         </div>
@@ -95,7 +95,7 @@
             <div class="footer-grid">
                 <div class="footer-col">
                     <h3>LibraTech</h3>
-                    <p>Your premier online bookstore for French literature and beyond.</p>
+                    <p>Votre librairie en ligne premium pour la littérature française et au-delà.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -105,41 +105,41 @@
                 </div>
                 
                 <div class="footer-col">
-                    <h4>Shop</h4>
+                    <h4>Boutique</h4>
                     <ul>
-                        <li><a href="{{ url_for('books') }}">All Books</a></li>
-                        <li><a href="#">New Releases</a></li>
-                        <li><a href="#">Best Sellers</a></li>
-                        <li><a href="#">Deals</a></li>
+                        <li><a href="{{ url_for('books') }}">Tous les livres</a></li>
+                        <li><a href="#">Nouveautés</a></li>
+                        <li><a href="#">Meilleures Ventes</a></li>
+                        <li><a href="#">Promotions</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
-                    <h4>Help</h4>
+                    <h4>Aide</h4>
                     <ul>
-                        <li><a href="#">Customer Service</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">Returns</a></li>
-                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Service Client</a></li>
+                        <li><a href="#">Informations de Livraison</a></li>
+                        <li><a href="#">Retours</a></li>
+                        <li><a href="#">Contactez-nous</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
                     <h4>Newsletter</h4>
-                    <p>Subscribe for updates and exclusive deals.</p>
+                    <p>Abonnez-vous pour des mises à jour et des offres exclusives.</p>
                     <form class="newsletter-form">
-                        <input type="email" placeholder="Your email" required>
-                        <button type="submit">Subscribe</button>
+                        <input type="email" placeholder="Votre email" required>
+                        <button type="submit">S'abonner</button>
                     </form>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 LibraTech Bookstore. All rights reserved.</p>
+                <p>&copy; 2024 LibraTech Librairie. Tous droits réservés.</p>
                 <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Cookie Policy</a>
+                    <a href="#">Politique de Confidentialité</a>
+                    <a href="#">Conditions d'Utilisation</a>
+                    <a href="#">Politique des Cookies</a>
                 </div>
             </div>
         </div>

@@ -629,7 +629,7 @@ body {
     }
 }
 
-/* Responsive */
+/* Responsive 
 @media (max-width: 768px) {
     .header-top {
         flex-wrap: wrap;
@@ -657,4 +657,4 @@ body {
     .books-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
-}
+}*/

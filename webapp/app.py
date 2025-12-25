@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime
 from functools import wraps
+from email_validator import validate_email, EmailNotValidError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -93,32 +94,6 @@ def cart():
 
 @app.route('/api/cart/add', methods=['POST'])
 @login_required
-def add_to_cart():
-    data = request.get_json()
-    book_id = data.get('book_id')
-    quantity = data.get('quantity', 1)
-    
-    book = Book.query.get(book_id)
-    if not book:
-        return jsonify({'error': 'Book not found'}), 404
-    
-    if book.stock_quantity < quantity:
-        return jsonify({'error': 'Not enough stock'}), 400
-    
-    # Here you would add to session cart or database cart
-    # For now, return success
-    return jsonify({
-        'success': True,
-        'message': f'Added {book.title} to cart',
-        'book': {
-            'id': book.book_id,
-            'title': book.title,
-            'price': float(book.price)
-        }
-    })
-
-@app.route('/api/cart/add', methods=['POST'])
-@login_required
 def api_add_to_cart():
     """Add item to cart in database"""
     try:
@@ -192,28 +167,62 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        
+        # Validation
+        errors = []
+        if not email:
+            errors.append('Email is required')
+        else:
+            try:
+                validate_email(email)
+            except EmailNotValidError:
+                errors.append('Invalid email address')
+
+        if Customer.query.filter_by(email=email).first():
+            flash('Email already registered', 'error')
+            return redirect(url_for('register'))
+        
+        if not password or len(password) < 8:
+            errors.append('Password must be at least 8 characters')
+        
+        if not first_name:
+            errors.append('First name is required')
+        
+        if not last_name:
+            errors.append('Last name is required')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return redirect(url_for('register'))
         
         if Customer.query.filter_by(email=email).first():
             flash('Email already registered', 'error')
             return redirect(url_for('register'))
         
-        customer = Customer(
-            email=email,
-            first_name=first_name,
-            last_name=last_name
-        )
-        customer.set_password(password)
+        try:
+            customer = Customer(
+                email=email,
+                first_name=first_name,
+                last_name=last_name
+            )
+            customer.set_password(password)
+            
+            db.session.add(customer)
+            db.session.commit()
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Registration error: {str(e)}')
+            flash('An error occurred during registration. Please try again.', 'error')
+            return redirect(url_for('register'))
         
-        db.session.add(customer)
-        db.session.commit()
-        
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
-    
     return render_template('register.html')
 
 @app.route('/logout')

@@ -11,7 +11,7 @@ class Genre(db.Model):
     
     genre_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
-    books = db.relationship('Book', backref='genre_ref', lazy=True)
+    books = db.relationship('Book', back_populates='genre', lazy=True)
 
 class Author(db.Model):
     __tablename__ = 'authors'
@@ -42,7 +42,7 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     author = db.relationship('Author', backref='book_list')
-    genre = db.relationship('Genre', backref='book_list')
+    genre = db.relationship('Genre', back_populates='books')
     
     @property
     def formatted_price(self):
@@ -61,18 +61,6 @@ class Book(db.Model):
         else:
             return "Out of Stock"
             
-      # Add properties for missing columns
-    @property
-    def safe_image_url(self):
-        # Return image_url if it exists, otherwise return default
-        if hasattr(self, 'image_url') and self.image_url:
-            return self.image_url
-        return '/static/images/book-placeholder.jpg'
-    
-    @property
-    def created_at(self):
-        # Return current time or published date as fallback
-        return self.published_date or datetime.utcnow()
 
 class Customer(db.Model, UserMixin):
     __tablename__ = 'customers'
@@ -83,7 +71,6 @@ class Customer(db.Model, UserMixin):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     shipping_address = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
     orders = db.relationship('Order', backref='customer', lazy=True)

@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Books - LibraTech Bookstore{% endblock %}
+{% block title %}Parcourir les livres - LibraTech Librairie{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
-        <h1>Browse Books</h1>
-        <p>Discover our collection of French literature and international bestsellers</p>
+        <h1>Parcourir les Livres</h1>
+        <p>Découvrez notre collection de littérature française et de best-sellers internationaux</p>
     </div>
 
     <!-- Filters and Search -->
@@ -14,20 +18,20 @@
         <div class="filters-top">
             <div class="search-summary">
                 {% if search %}
-                    <p>Search results for: <strong>"{{ search }}"</strong></p>
+                    <p>Résultats de recherche pour : <strong>"{{ search }}"</strong></p>
                 {% endif %}
-                <p>Showing {{ books.total }} books</p>
+                <p>Affichage de {{ books.total }} livres</p>
             </div>
             
             <div class="filter-controls">
                 <div class="sort-dropdown">
-                    <label for="sort">Sort by:</label>
+                    <label for="sort">Trier par :</label>
                     <select id="sort" name="sort">
-                        <option value="newest">Newest</option>
-                        <option value="title">Title A-Z</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                        <option value="popular">Most Popular</option>
+                        <option value="newest">Le plus récent</option>
+                        <option value="title">Titre A-Z</option>
+                        <option value="price_low">Prix : Croissant</option>
+                        <option value="price_high">Prix : Décroissant</option>
+                        <option value="popular">Le plus populaire</option>
                     </select>
                 </div>
                 
@@ -45,10 +49,10 @@
         <div class="filters-main">
             <!-- Categories Filter -->
             <div class="filter-group">
-                <h3>Categories</h3>
+                <h3>Catégories</h3>
                 <div class="filter-options">
                     <a href="{{ url_for('books') }}" class="filter-option {% if not current_genre %}active{% endif %}">
-                        All Categories
+                        Toutes les Catégories
                     </a>
                     {% for genre in all_genres %}
                     <a href="{{ url_for('books', genre=genre.genre_id) }}" 
@@ -62,7 +66,7 @@
             
             <!-- Price Filter -->
             <div class="filter-group">
-                <h3>Price Range</h3>
+                <h3>Fourchette de Prix</h3>
                 <div class="price-slider">
                     <input type="range" min="0" max="100" value="50" class="slider" id="priceRange">
                     <div class="price-labels">
@@ -75,13 +79,13 @@
             
             <!-- Stock Filter -->
             <div class="filter-group">
-                <h3>Availability</h3>
+                <h3>Disponibilité</h3>
                 <div class="filter-options">
                     <label class="filter-checkbox">
-                        <input type="checkbox" checked> In Stock
+                        <input type="checkbox" checked> En Stock
                     </label>
                     <label class="filter-checkbox">
-                        <input type="checkbox"> Out of Stock
+                        <input type="checkbox"> Rupture de Stock
                     </label>
                 </div>
             </div>
@@ -100,9 +104,9 @@
                                  alt="{{ book.title }}">
                         </a>
                         {% if not book.in_stock %}
-                        <span class="out-of-stock">Out of Stock</span>
+                        <span class="out-of-stock">Rupture de Stock</span>
                         {% elif book.stock_quantity < 5 %}
-                        <span class="low-stock">Low Stock</span>
+                        <span class="low-stock">Stock Faible</span>
                         {% endif %}
                     </div>
                     <div class="book-info">
@@ -121,7 +125,7 @@
                             <span class="book-price">{{ book.formatted_price }}</span>
                             <button class="btn-add-cart" data-book-id="{{ book.book_id }}"
                                     {% if not book.in_stock %}disabled{% endif %}>
-                                <i class="fas fa-cart-plus"></i> Add to Cart
+                                <i class="fas fa-cart-plus"></i> Ajouter au Panier
                             </button>
                         </div>
                     </div>
@@ -134,7 +138,7 @@
             <div class="pagination">
                 {% if books.has_prev %}
                     <a href="{{ url_for('books', page=books.prev_num, genre=current_genre, search=search) }}" 
-                       class="page-link">Previous</a>
+                       class="page-link">Précédent</a>
                 {% endif %}
                 
                 {% for page_num in books.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
@@ -152,275 +156,20 @@
                 
                 {% if books.has_next %}
                     <a href="{{ url_for('books', page=books.next_num, genre=current_genre, search=search) }}" 
-                       class="page-link">Next</a>
+                       class="page-link">Suivant</a>
                 {% endif %}
             </div>
             {% endif %}
         {% else %}
             <div class="no-results">
                 <i class="fas fa-book-open"></i>
-                <h3>No books found</h3>
-                <p>Try adjusting your search or filters</p>
-                <a href="{{ url_for('books') }}" class="btn btn-primary">Clear Filters</a>
+                <h3>Aucun livre trouvé</h3>
+                <p>Essayez d'ajuster votre recherche ou vos filtres</p>
+                <a href="{{ url_for('books') }}" class="btn btn-primary">Effacer les Filtres</a>
             </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.books-container {
-    margin-top: 30px;
-}
-
-.page-header {
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-.page-header h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.page-header p {
-    color: var(--text-light);
-    font-size: 18px;
-}
-
-.filters-section {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow);
-}
-
-.filters-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.search-summary p {
-    margin: 5px 0;
-}
-
-.filter-controls {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.sort-dropdown {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.sort-dropdown select {
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: white;
-}
-
-.view-toggle {
-    display: flex;
-    gap: 5px;
-}
-
-.view-btn {
-    background: var(--light-color);
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.view-btn.active {
-    background: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
-
-.filters-main {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-}
-
-.filter-group h3 {
-    margin-bottom: 15px;
-    font-size: 16px;
-    color: var(--text-color);
-}
-
-.filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.filter-option {
-    color: var(--text-light);
-    text-decoration: none;
-    padding: 8px 0;
-    border-radius: 4px;
-    transition: var(--transition);
-}
-
-.filter-option:hover {
-    color: var(--accent-color);
-    padding-left: 10px;
-}
-
-.filter-option.active {
-    color: var(--accent-color);
-    font-weight: bold;
-    background-color: rgba(20, 110, 180, 0.1);
-    padding-left: 15px;
-}
-
-.book-count {
-    float: right;
-    color: var(--text-light);
-    font-size: 12px;
-}
-
-.price-slider {
-    padding: 10px 0;
-}
-
-.slider {
-    width: 100%;
-    height: 5px;
-    border-radius: 5px;
-    background: var(--border-color);
-    outline: none;
-}
-
-.price-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--text-light);
-}
-
-.filter-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 5px 0;
-}
-
-.filter-checkbox input {
-    width: 16px;
-    height: 16px;
-}
-
-.book-description {
-    margin: 10px 0;
-    font-size: 14px;
-    color: var(--text-light);
-    line-height: 1.5;
-}
-
-/* List View Styles */
-.books-grid.list-view {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.books-grid.list-view .book-card {
-    display: grid;
-    grid-template-columns: 150px 1fr auto;
-    gap: 20px;
-    align-items: center;
-}
-
-.books-grid.list-view .book-image {
-    height: 200px;
-}
-
-.books-grid.list-view .book-info {
-    padding: 10px 0;
-}
-
-.books-grid.list-view .book-description {
-    display: block;
-    margin: 10px 0;
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 40px;
-}
-
-.page-link {
-    padding: 8px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: var(--transition);
-}
-
-.page-link:hover {
-    background-color: var(--light-color);
-}
-
-.page-link.active {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
-
-/* No Results */
-.no-results {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-.no-results i {
-    font-size: 60px;
-    color: var(--border-color);
-    margin-bottom: 20px;
-}
-
-.no-results h3 {
-    margin-bottom: 10px;
-    color: var(--text-color);
-}
-
-.no-results p {
-    color: var(--text-light);
-    margin-bottom: 20px;
-}
-
-.low-stock {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #ffc107;
-    color: #856404;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -452,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (priceSlider) {
         priceSlider.addEventListener('input', function() {
             // You could implement price filtering here
-            console.log('Price range:', this.value);
+            console.log('Fourchette de prix :', this.value);
         });
     }
     
@@ -461,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sortDropdown) {
         sortDropdown.addEventListener('change', function() {
             // You could implement sorting here
-            console.log('Sort by:', this.value);
+            console.log('Trier par :', this.value);
         });
     }
 });

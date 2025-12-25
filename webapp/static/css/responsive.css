@@ -1,166 +1,406 @@
-/* Responsive Design */
+/* ============================================
+   RESPONSIVE DESIGN
+   Mobile-first responsive styles
+   ============================================ */
+
+/* Base Responsive Settings */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   HEADER RESPONSIVE
+   ============================================ */
 @media (max-width: 1200px) {
-    .container {
-        max-width: 960px;
-    }
+  .container {
+    max-width: 960px;
+  }
 }
 
 @media (max-width: 992px) {
-    .container {
-        max-width: 720px;
-    }
-    
-    .books-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    }
-    
-    .category-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
+  .container {
+    max-width: 720px;
+  }
+  
+  .header-top {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .search-bar {
+    order: 3;
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  .user-actions {
+    margin-left: auto;
+  }
 }
 
 @media (max-width: 768px) {
-    .container {
-        max-width: 540px;
-    }
-    
-    .header-top {
-        flex-direction: column;
-        gap: 15px;
-        padding: 10px 0;
-    }
-    
-    .logo {
-        order: 1;
-    }
-    
-    .user-actions {
-        order: 2;
-    }
-    
-    .search-bar {
-        order: 3;
-        width: 100%;
-        margin: 10px 0;
-    }
-    
-    .navbar ul {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 10px 0;
-    }
-    
-    .hero h1 {
-        font-size: 32px;
-    }
-    
-    .hero p {
-        font-size: 18px;
-    }
-    
-    .books-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .features .container {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .container {
+    max-width: 540px;
+    padding: 0 15px;
+  }
+  
+  .header-top {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .logo {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .search-bar {
+    order: 2;
+    width: 100%;
+  }
+  
+  .user-actions {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .navbar ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .navbar li {
+    margin: 0 5px;
+  }
+  
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+    margin-top: 5px;
+  }
 }
 
 @media (max-width: 576px) {
-    .container {
-        padding: 0 15px;
-    }
-    
-    .hero {
-        padding: 40px 0;
-    }
-    
-    .hero h1 {
-        font-size: 28px;
-    }
-    
-    .books-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .features .container {
-        grid-template-columns: 1fr;
-    }
-    
-    .footer-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .footer-bottom {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .section-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
+  .container {
+    padding: 0 10px;
+  }
+  
+  .header-top {
+    padding: 10px 0;
+  }
+  
+  .logo span {
+    font-size: 1.5rem;
+  }
+  
+  .user-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .auth-btn, .register {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .navbar ul {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .navbar li {
+    width: 100%;
+    text-align: center;
+  }
 }
 
-/* Mobile Navigation Toggle */
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
+/* ============================================
+   HERO SECTION RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .hero .container {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .hero-content {
+    margin-bottom: 30px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-content p {
+    font-size: 1rem;
+  }
+  
+  .hero-image {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================
+   FOOTER RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+  
+  .footer-col:nth-child(1),
+  .footer-col:nth-child(4) {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
 }
 
 @media (max-width: 768px) {
-    .menu-toggle {
-        display: block;
-    }
-    
-    .navbar ul {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background-color: var(--primary-color);
-        padding: 20px;
-        z-index: 1000;
-    }
-    
-    .navbar.active ul {
-        display: flex;
-    }
-    
-    .dropdown-content {
-        position: static;
-        box-shadow: none;
-        border-radius: 0;
-        background-color: rgba(0,0,0,0.2);
-    }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .footer-col {
+    padding: 0;
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .footer-links {
+    justify-content: center;
+  }
 }
 
-/* Touch Device Optimizations */
-@media (hover: none) and (pointer: coarse) {
-    .book-card:hover {
-        transform: none;
-    }
-    
-    .btn:hover,
-    .auth-btn:hover {
-        opacity: 0.8;
-    }
-    
-    .dropdown:hover .dropdown-content {
-        display: none;
-    }
-    
-    .dropdown.active .dropdown-content {
-        display: block;
-    }
+/* ============================================
+   BOOK CARDS RESPONSIVE
+   ============================================ */
+@media (max-width: 1200px) {
+  .books-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .books-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .book-card {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES FOR RESPONSIVE
+   ============================================ */
+/* Hide on mobile */
+.hide-mobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Show on mobile */
+.show-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+/* Mobile menu */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .navbar ul {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    padding: 15px;
+  }
+  
+  .navbar.active ul {
+    display: flex;
+  }
+}
+
+/* ============================================
+   FORM RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .input-with-icon input {
+    padding: 12px 12px 12px 40px;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   TABLE RESPONSIVE
+   ============================================ */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================
+   MODAL RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ============================================
+   TYPOGRAPHY RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+  
+  .page-header h1 {
+    font-size: 2rem;
+  }
+  
+  .page-header p {
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   SPACING RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .main {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .section {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .card {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* ============================================
+   GRID RESPONSIVE
+   ============================================ */
+.grid-1 { grid-template-columns: 1fr; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 992px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-4,
+  .grid-3,
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .header,
+  .footer,
+  .navbar,
+  .btn,
+  .cart-count,
+  .user-menu,
+  .search-bar,
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+  
+  .book-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
 }

@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}Commande - LibraTech Librairie{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>Commande</h1>
+        <div class="checkout-steps">
+            <div class="step active">
+                <span class="step-number">1</span>
+                <span class="step-text">Livraison</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-text">Paiement</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-text">Vérification</span>
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <span class="step-text">Confirmation</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="checkout-grid">
+        <!-- Left Column: Forms -->
+        <div class="checkout-forms">
+            <!-- Shipping Address -->
+            <section class="checkout-section">
+                <h2>Adresse de Livraison</h2>
+                <div class="address-options">
+                    <div class="address-option selected">
+                        <div class="address-content">
+                            <h3>Adresse Domicile</h3>
+                            <p>{{ current_user.first_name }} {{ current_user.last_name }}</p>
+                            {% if current_user.shipping_address %}
+                            <p>{{ current_user.shipping_address }}</p>
+                            {% else %}
+                            <p>Aucune adresse enregistrée</p>
+                            {% endif %}
+                            <p>{{ current_user.email }}</p>
+                        </div>
+                        <button class="btn-edit">Modifier</button>
+                    </div>
+                    <button class="address-add">
+                        <i class="fas fa-plus"></i> Ajouter une Nouvelle Adresse
+                    </button>
+                </div>
+
+                <!-- Shipping Method -->
+                <div class="shipping-methods">
+                    <h3>Méthode de Livraison</h3>
+                    <div class="method-options">
+                        <label class="method-option selected">
+                            <input type="radio" name="shipping" checked>
+                            <div class="method-content">
+                                <div class="method-header">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    <div>
+                                        <h4>Livraison Standard</h4>
+                                        <p>3-5 jours ouvrables</p>
+                                    </div>
+                                </div>
+                                <span class="method-price">Gratuit</span>
+                            </div>
+                        </label>
+                        
+                        <label class="method-option">
+                            <input type="radio" name="shipping">
+                            <div class="method-content">
+                                <div class="method-header">
+                                    <i class="fas fa-bolt"></i>
+                                    <div>
+                                        <h4>Livraison Express</h4>
+                                        <p>1-2 jours ouvrables</p>
+                                    </div>
+                                </div>
+                                <span class="method-price">€5.99</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Method -->
+            <section class="checkout-section">
+                <h2>Méthode de Paiement</h2>
+                <div class="payment-tabs">
+                    <button class="tab-btn active" data-tab="card">Carte de Crédit/Débit</button>
+                    <button class="tab-btn" data-tab="paypal">PayPal</button>
+                    <button class="tab-btn" data-tab="applepay">Apple Pay</button>
+                </div>
+
+                <div class="tab-content active" id="card-tab">
+                    <form class="payment-form">
+                        <div class="form-group">
+                            <label for="card-number">Numéro de Carte</label>
+                            <div class="input-with-icon">
+                                <i class="far fa-credit-card"></i>
+                                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry-date">Date d'Expiration</label>
+                                <input type="text" id="expiry-date" placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <div class="input-with-icon">
+                                    <input type="text" id="cvv" placeholder="123" maxlength="3">
+                                    <i class="fas fa-question-circle" title="Code à 3 chiffres au dos de la carte"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="card-name">Nom sur la Carte</label>
+                            <input type="text" id="card-name" placeholder="Jean Dupont">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" checked>
+                                <span>Enregistrer la carte pour les achats futurs</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-content" id="paypal-tab">
+                    <div class="paypal-info">
+                        <i class="fab fa-paypal"></i>
+                        <p>Vous serez redirigé vers PayPal pour compléter votre paiement en toute sécurité.</p>
+                        <button class="btn btn-secondary">Continuer avec PayPal</button>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="applepay-tab">
+                    <div class="applepay-info">
+                        <i class="fab fa-apple"></i>
+                        <p>Complétez votre achat rapidement et en toute sécurité avec Apple Pay.</p>
+                        <button class="btn btn-secondary">Payer avec Apple Pay</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Information -->
+            <section class="checkout-section">
+                <h2>Coordonnées</h2>
+                <div class="contact-form">
+                    <div class="form-group">
+                        <label for="email">Adresse Email</label>
+                        <input type="email" id="email" value="{{ current_user.email }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Numéro de Téléphone</label>
+                        <input type="tel" id="phone" placeholder="+33 1 23 45 67 89">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="order-summary">
+            <div class="summary-card">
+                <h2>Récapitulatif de Commande</h2>
+                
+                <div class="order-items">
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="/static/images/book-placeholder.jpg" alt="Livre">
+                        </div>
+                        <div class="item-details">
+                            <h4>The Great Gatsby</h4>
+                            <p>F. Scott Fitzgerald</p>
+                            <div class="item-meta">
+                                <span>Qté: 1</span>
+                                <span>€12.99</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="/static/images/book-placeholder.jpg" alt="Livre">
+                        </div>
+                        <div class="item-details">
+                            <h4>1984</h4>
+                            <p>George Orwell</p>
+                            <div class="item-meta">
+                                <span>Qté: 2</span>
+                                <span>€19.98</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-totals">
+                    <div class="total-line">
+                        <span>Sous-total</span>
+                        <span>€32.97</span>
+                    </div>
+                    <div class="total-line">
+                        <span>Livraison</span>
+                        <span>Gratuit</span>
+                    </div>
+                    <div class="total-line">
+                        <span>Taxe</span>
+                        <span>€3.30</span>
+                    </div>
+                    <div class="total-line total">
+                        <span>Total</span>
+                        <span class="total-price">€36.27</span>
+                    </div>
+                </div>
+
+                <div class="promo-code">
+                    <div class="promo-header">
+                        <i class="fas fa-tag"></i>
+                        <h3>Code Promo</h3>
+                    </div>
+                    <div class="promo-input">
+                        <input type="text" placeholder="Entrez le code">
+                        <button class="btn-apply">Appliquer</button>
+                    </div>
+                    <div class="promo-suggestions">
+                        <span class="promo-suggestion" data-code="WELCOME10">WELCOME10 - 10% de réduction</span>
+                        <span class="promo-suggestion" data-code="READMORE">READMORE - 5€ de réduction</span>
+                    </div>
+                </div>
+
+                <div class="security-info">
+                    <p><i class="fas fa-lock"></i> Chiffrement SSL sécurisé</p>
+                    <p><i class="fas fa-shield-alt"></i> Paiement 100% Sécurisé</p>
+                    <p><i class="fas fa-undo"></i> Politique de Retour de 30 Jours</p>
+                </div>
+
+                <button class="btn btn-primary btn-place-order">
+                    <i class="fas fa-lock"></i> Passer la Commande
+                </button>
+
+                <p class="terms-notice">
+                    En passant votre commande, vous acceptez nos <a href="#">Conditions d'Utilisation</a> et notre <a href="#">Politique de Confidentialité</a>
+                </p>
+            </div>
+
+            <!-- Customer Support -->
+            <div class="support-card">
+                <h3>Besoin d'Aide ?</h3>
+                <div class="support-options">
+                    <div class="support-option">
+                        <i class="fas fa-comments"></i>
+                        <div>
+                            <h4>Chat en Direct</h4>
+                            <p>Disponible 24/7</p>
+                        </div>
+                    </div>
+                    <div class="support-option">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Appelez-nous</h4>
+                            <p>+33 1 23 45 67 89</p>
+                        </div>
+                    </div>
+                    <div class="support-option">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>support@libratech.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Payment tabs
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Update active tab button
+            tabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show corresponding tab content
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabId + '-tab') {
+                    content.classList.add('active');
+                }
+            });
+        });
+    });
+    
+    // Address selection
+    const addressOptions = document.querySelectorAll('.address-option');
+    addressOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            addressOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+    
+    // Shipping method selection
+    const methodOptions = document.querySelectorAll('.method-option');
+    methodOptions.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        option.addEventListener('click', () => {
+            methodOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            radio.checked = true;
+        });
+    });
+    
+    // Card number formatting
+    const cardNumberInput = document.getElementById('card-number');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function() {
+            let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formatted += ' ';
+                }
+                formatted += value[i];
+            }
+            
+            this.value = formatted.substring(0, 19);
+        });
+    }
+    
+    // Expiry date formatting
+    const expiryInput = document.getElementById('expiry-date');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            
+            if (value.length >= 2) {
+                this.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                this.value = value;
+            }
+        });
+    }
+    
+    // CVV input restriction
+    const cvvInput = document.getElementById('cvv');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').substring(0, 3);
+        });
+    }
+    
+    // Promo code suggestions
+    const promoInput = document.querySelector('.promo-input input');
+    const promoButtons = document.querySelectorAll('.promo-suggestion');
+    
+    promoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            promoInput.value = code;
+            
+            // Show success message
+            showMessage('Code promo appliqué !', 'success');
+        });
+    });
+    
+    // Apply promo code
+    const applyBtn = document.querySelector('.btn-apply');
+    if (applyBtn && promoInput) {
+        applyBtn.addEventListener('click', function() {
+            const code = promoInput.value.trim();
+            if (code) {
+                // Here you would validate the promo code with your backend
+                showMessage('Code promo appliqué !', 'success');
+            } else {
+                showMessage('Veuillez entrer un code promo', 'error');
+            }
+        });
+    }
+    
+    // Place order button
+    const placeOrderBtn = document.querySelector('.btn-place-order');
+    if (placeOrderBtn) {
+        placeOrderBtn.addEventListener('click', function() {
+            // Validate form
+            const cardNumber = document.getElementById('card-number');
+            const expiry = document.getElementById('expiry-date');
+            const cvv = document.getElementById('cvv');
+            const cardName = document.getElementById('card-name');
+            
+            let isValid = true;
+            
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+            
+            // Validate card number (simple validation)
+            if (cardNumber && cardNumber.value.replace(/\s/g, '').length < 16) {
+                showError(cardNumber, 'Veuillez entrer un numéro de carte valide');
+                isValid = false;
+            }
+            
+            // Validate expiry date
+            if (expiry && !expiry.value.includes('/')) {
+                showError(expiry, 'Veuillez entrer une date d\'expiration valide (MM/AA)');
+                isValid = false;
+            }
+            
+            // Validate CVV
+            if (cvv && cvv.value.length < 3) {
+                showError(cvv, 'Veuillez entrer un CVV valide');
+                isValid = false;
+            }
+            
+            // Validate card name
+            if (cardName && !cardName.value.trim()) {
+                showError(cardName, 'Veuillez entrer le nom sur la carte');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+                this.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    showMessage('Commande passée avec succès ! Redirection...', 'success');
+                    
+                    // Redirect to order confirmation page (simulated)
+                    setTimeout(() => {
+                        window.location.href = '/'; // Redirect to home or order confirmation page
+                    }, 2000);
+                }, 3000);
+            }
+        });
+    }
+    
+    function showError(element, message) {
+        element.classList.add('error');
+        
+        const error = document.createElement('div');
+        error.className = 'error-message';
+        error.style.color = 'var(--error-color)';
+        error.style.fontSize = '12px';
+        error.style.marginTop = '5px';
+        error.textContent = message;
+        
+        element.parentNode.insertBefore(error, element.nextSibling);
+    }
+    
+    function showMessage(message, type) {
+        // Remove existing messages
+        const existingMsg = document.querySelector('.checkout-message');
+        if (existingMsg) existingMsg.remove();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `checkout-message ${type}`;
+        messageDiv.textContent = message;
+        
+        // Style the message
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.top = '20px';
+        messageDiv.style.right = '20px';
+        messageDiv.style.padding = '15px 20px';
+        messageDiv.style.borderRadius = '8px';
+        messageDiv.style.color = 'white';
+        messageDiv.style.zIndex = '10000';
+        messageDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        messageDiv.style.animation = 'slideIn 0.3s ease';
+        
+        if (type === 'success') {
+            messageDiv.style.backgroundColor = 'var(--success-color)';
+        } else {
+            messageDiv.style.backgroundColor = 'var(--error-color)';
+        }
+        
+        document.body.appendChild(messageDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => messageDiv.remove(), 500);
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
