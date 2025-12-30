@@ -771,13 +771,13 @@ a:hover {
 }
 
 .footer-col a {
-    color: #ddd;
+    color: white;
     text-decoration: none;
     transition: var(--transition);
 }
 
 .footer-col a:hover {
-    color: white;
+    color: cyan;
 }
 
 .social-icons {
