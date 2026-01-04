@@ -158,7 +158,10 @@ def login():
         if customer and customer.check_password(password):
             login_user(customer)
             flash('Logged in successfully!', 'success')
-            return redirect(url_for('index'))
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('index')
+            return redirect(next_page)
         else:
             flash('Invalid email or password', 'error')
     
@@ -198,10 +201,6 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'error')
-            return redirect(url_for('register'))
-        
-        if Customer.query.filter_by(email=email).first():
-            flash('Email already registered', 'error')
             return redirect(url_for('register'))
         
         try:
