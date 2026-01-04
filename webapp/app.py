@@ -7,35 +7,41 @@ from datetime import datetime
 from functools import wraps
 from email_validator import validate_email, EmailNotValidError
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:password@db:5432/LibraTech_db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Initialize extensions
-db.init_app(app)
 login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Customer.query.get(user_id)
+def create_app():
+    app = Flask(__name__)
 
-# Add current_user to all templates automatically
-@app.context_processor
-def inject_user():
-    return dict(current_user=current_user)
+    app.config['SECRET_KEY'] = os.getenv(
+        'SECRET_KEY', 'dev-secret-key-change-in-production'
+    )
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+        'DATABASE_URL',
+        'postgresql://postgres:password@db:5432/LibraTech_db'
+    )
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Decorator to add genres to all templates
-@app.before_request
-def before_request():
-    g.genres = Genre.query.limit(10).all()
+    # Initialize extensions
+    db.init_app(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
 
-@app.context_processor
-def inject_genres():
-    genres = getattr(g, 'genres', [])
-    return dict(genres=genres)
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Customer.query.get(user_id)
+
+    @app.context_processor
+    def inject_user():
+        return dict(current_user=current_user)
+
+    @app.before_request
+    def before_request():
+        g.genres = Genre.query.limit(10).all()
+
+    @app.context_processor
+    def inject_genres():
+        genres = getattr(g, 'genres', [])
+        return dict(genres=genres)
 
 @app.route('/')
 def index():
@@ -250,7 +256,4 @@ def search_books():
         'image': book.image_url
     } for book in books])
 
-if __name__ == '__main__':
-    with app.app_context():
-        init_db()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+return app
