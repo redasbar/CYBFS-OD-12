@@ -31,7 +31,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: python app.py
+    command: python run.py
 
 # Define a volume to persist our database data
 volumes:
