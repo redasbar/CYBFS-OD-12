@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, init_db, Book, Author, Genre, Customer, Order, OrderItem
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.urls import url_parse
 import os
 from datetime import datetime
 from functools import wraps
@@ -11,15 +12,16 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-
-    app.config['SECRET_KEY'] = os.getenv(
-        'SECRET_KEY', 'dev-secret-key-change-in-production'
-    )
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL',
-        'postgresql://postgres:password@db:5432/LibraTech_db'
-    )
+    app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        SESSION_COOKIE_SECURE=False,  # True when HTTPS
+        REMEMBER_COOKIE_HTTPONLY=True
+    )    
 
     # Initialize extensions
     db.init_app(app)
