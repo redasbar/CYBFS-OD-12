@@ -1,14 +1,16 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, init_db, Book, Author, Genre, Customer, Order, OrderItem
+from .models import db, Book, Author, Genre, Customer, Order, OrderItem
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.urls import url_parse
+#from werkzeug.utils import url_parse
 import os
 from datetime import datetime
 from functools import wraps
 from email_validator import validate_email, EmailNotValidError
+from flask_migrate import Migrate
 
 login_manager = LoginManager()
+
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +27,7 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
+    migrate = Migrate()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
@@ -167,7 +170,7 @@ def create_app():
                 login_user(customer)
                 flash('Logged in successfully!', 'success')
                 next_page = request.args.get('next')
-                if not next_page or url_parse(next_page).netloc != '':
+                if not next_page: #or url_parse(next_page).netloc != '':
                     next_page = url_for('index')
                 return redirect(next_page)
             else:

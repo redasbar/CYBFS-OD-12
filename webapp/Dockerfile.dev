@@ -1,9 +1,11 @@
+# Dockerfile.dev
 FROM python:3.11-slim
 
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    ENVIRONMENT=dev
 
 # Install system dependencies
 RUN apt-get update \
@@ -17,11 +19,12 @@ RUN useradd -m -u 1000 flaskuser
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code with correct ownership
+# Copy app code
 COPY --chown=flaskuser:flaskuser . .
 
 USER flaskuser
 
 EXPOSE 5000
 
+# Start Flask dev server
 CMD ["python", "run.py"]
