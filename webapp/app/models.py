@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import uuid
+from sqlalchemy.dialects.postgresql import UUID
 
 db = SQLAlchemy()
 
@@ -60,18 +61,20 @@ class Book(db.Model):
             return f"Only {self.stock_quantity} left"
         else:
             return "Out of Stock"
-            
+
+# ================= UUID Tables =================
 
 class Customer(db.Model, UserMixin):
     __tablename__ = 'customers'
     
-    customer_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    customer_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     shipping_address = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     orders = db.relationship('Order', backref='customer', lazy=True)
     
@@ -82,13 +85,13 @@ class Customer(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
     
     def get_id(self):
-        return self.customer_id
+        return str(self.customer_id)
 
 class Order(db.Model):
     __tablename__ = 'orders'
     
-    order_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    customer_id = db.Column(db.String(36), db.ForeignKey('customers.customer_id'), nullable=False)
+    order_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    customer_id = db.Column(UUID(as_uuid=True), db.ForeignKey('customers.customer_id'), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
     status = db.Column(db.String(20), default='pending')
@@ -99,14 +102,41 @@ class OrderItem(db.Model):
     __tablename__ = 'order_items'
     
     order_item_id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.String(36), db.ForeignKey('orders.order_id'), nullable=False)
+    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.order_id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     unit_price = db.Column(db.Numeric(10, 2), nullable=False)
     
     book = db.relationship('Book')
 
-# Create tables if they don't exist
-def init_db():
+class Payment(db.Model):
+    __tablename__ = 'payments'
     
+    payment_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey('orders.order_id'), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    provider_payment_id = db.Column(db.String(255), unique=True, nullable=False)
+    payment_gateway = db.Column(db.String(50), nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)  # use ENUM in DB
+    status = db.Column(db.String(50), nullable=False)
+    last_four_digits = db.Column(db.CHAR(4))
+    card_brand = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    
+    user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # use ENUM in DB
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ================= Init DB Helper =================
+def init_db():
     db.create_all()
