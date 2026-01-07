@@ -2,44 +2,9 @@
 set -e
 
 echo "Waiting for the database to be ready..."
-sleep 5
-
-# Ensure migrations folder exists (do not chown if bind-mounted)
-#mkdir -p /app/migrations
-#chown -R flaskuser:flaskuser /app/migrations
-
-# Initialize migrations only if env.py is missing
-#if [ ! -f "/app/migrations/env.py" ]; then
-#    echo "Initializing Flask-Migrate..."
-#    flask db init
-#fi
-
-# Generate migration if there are model changes
-#echo "Checking for migrations..."
-#flask db migrate -m "Auto migration" || echo "No changes to migrate"
-
-# Only initialize if folder does NOT exist
-#if [ ! -d "/app/migrations" ]; then
-#    echo "Initializing Flask-Migrate..."
-#    flask db init
-#    flask db migrate -m "Initial migration"
-#else
-#    echo "Migrations folder already exists, skipping init."
-#fi
-
-# Check if migrations folder exists and env.py is there
-#if [ ! -f "/app/migrations/env.py" ] || [ ! "$(ls -A /app/migrations/versions 2>/dev/null)" ]; then
-#    echo "Migrations not found. Initializing Flask-Migrate..."
-#    flask db init
-#    echo "Generating initial migration..."
-#    flask db migrate -m "Initial migration"
-#else
-#     echo "Migrations folder found, skipping init/migrate."
-#fi
-
-# Apply pending migrations
-echo "Applying database migrations..."
-flask db upgrade
+until pg_isready -h db -U "$DB_USER"; do
+  sleep 2
+done
 
 # Start Gunicorn
 echo "Starting Gunicorn..."
