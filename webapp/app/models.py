@@ -94,7 +94,7 @@ class Order(db.Model):
     customer_id = db.Column(UUID(as_uuid=True), db.ForeignKey('customers.customer_id'), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
-    status = db.Column(db.String(20), default='pending')
+    status = db.Column(db.String(20), default='cart')
     
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
 

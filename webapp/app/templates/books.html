@@ -9,31 +9,52 @@
 
 {% block content %}
 <div class="books-container">
-    <!-- Header -->
+    <!-- Header et filtres -->
     <div class="books-header">
         <h1>Livres</h1>
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" id="bookSearch" placeholder="Rechercher...">
         </div>
+
+        <!-- Filtres -->
+        <div class="books-filters">
+            <label>Prix max : <input type="range" id="priceRange" min="0" max="100" value="100"></label>
+            <label><input type="checkbox" id="inStockFilter"> En stock</label>
+            <label><input type="checkbox" id="outOfStockFilter"> Rupture</label>
+
+            <select id="sort">
+                <option value="newest">Nouveautés</option>
+                <option value="title">Titre A-Z</option>
+                <option value="price_low">Prix croissant</option>
+                <option value="price_high">Prix décroissant</option>
+                <option value="popular">Populaire</option>
+            </select>
+        </div>
     </div>
 
     <!-- Books Grid -->
     <div class="books-grid">
         {% for book in books.items %}
-        <div class="book-card">
-            <div class="book-image">
-                {% if book.cover_image %}
-                <img src="{{ url_for('static', filename='uploads/' + book.cover_image) }}" alt="Cover">
-                {% else %}
-                <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Cover">
-                {% endif %}
-            </div>
-            
+        <div class="book-card" data-book-id="{{ book.book_id }}">
+            <a href="{{ url_for('book_detail', book_id=book.book_id) }}" class="book-link">
+                <div class="book-image">
+                    {% if book.cover_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + book.cover_image) }}" alt="{{ book.title }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="{{ book.title }}">
+                    {% endif %}
+                </div>
+            </a>
+
             <div class="book-info">
-                <h3>{{ book.title }}</h3>
+                <h3><a href="{{ url_for('book_detail', book_id=book.book_id) }}">{{ book.title }}</a></h3>
                 <p class="author">{{ book.author }}</p>
-                <p class="price">{{ book.price }}€</p>
+                <p class="book-price">{{ book.price }}€</p>
+
+                <button class="btn-add-cart-small" data-book-id="{{ book.book_id }}">
+                    <i class="fas fa-shopping-cart"></i> Ajouter
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -42,8 +63,11 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/books-manager.js') }}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Recherche live
     const searchInput = document.getElementById('bookSearch');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -54,11 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const title = card.querySelector('h3').textContent.toLowerCase();
                 const author = card.querySelector('.author').textContent.toLowerCase();
                 
-                if (title.includes(searchTerm) || author.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = (title.includes(searchTerm) || author.includes(searchTerm)) ? 'block' : 'none';
             });
         });
     }

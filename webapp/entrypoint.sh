@@ -4,9 +4,9 @@ set -e
 echo "Waiting for the database to be ready..."
 sleep 5
 
-# Ensure migrations folder exists and has correct ownership
-mkdir -p /app/migrations
-chown -R flaskuser:flaskuser /app/migrations
+# Ensure migrations folder exists (do not chown if bind-mounted)
+#mkdir -p /app/migrations
+#chown -R flaskuser:flaskuser /app/migrations
 
 # Initialize migrations only if env.py is missing
 #if [ ! -f "/app/migrations/env.py" ]; then
@@ -28,13 +28,14 @@ chown -R flaskuser:flaskuser /app/migrations
 #fi
 
 # Check if migrations folder exists and env.py is there
-if [ ! -f "/app/migrations/env.py" ]; then
-    echo "Initializing Flask-Migrate..."
-    flask db init
-    flask db migrate -m "Initial migration"
-else
-    echo "Migrations folder is ready, skipping init."
-fi
+#if [ ! -f "/app/migrations/env.py" ] || [ ! "$(ls -A /app/migrations/versions 2>/dev/null)" ]; then
+#    echo "Migrations not found. Initializing Flask-Migrate..."
+#    flask db init
+#    echo "Generating initial migration..."
+#    flask db migrate -m "Initial migration"
+#else
+#     echo "Migrations folder found, skipping init/migrate."
+#fi
 
 # Apply pending migrations
 echo "Applying database migrations..."
