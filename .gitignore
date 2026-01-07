@@ -1,3 +1,7 @@
+# Environment variables
 .env
+.env.*
+!.env.example
 
-webapp/__pycache__/models.cpython-311.pyc
+
+webapp/__pycache__

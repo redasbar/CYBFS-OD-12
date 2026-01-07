@@ -1,28 +1,33 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, init_db, Book, Author, Genre, Customer, Order, OrderItem
+from .models import db, Book, Author, Genre, Customer, Order, OrderItem
 from werkzeug.security import generate_password_hash, check_password_hash
+#from werkzeug.utils import url_parse
 import os
 from datetime import datetime
 from functools import wraps
 from email_validator import validate_email, EmailNotValidError
+from flask_migrate import Migrate
 
 login_manager = LoginManager()
 
+
 def create_app():
     app = Flask(__name__)
-
-    app.config['SECRET_KEY'] = os.getenv(
-        'SECRET_KEY', 'dev-secret-key-change-in-production'
-    )
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL',
-        'postgresql://postgres:password@db:5432/LibraTech_db'
-    )
+    app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        SESSION_COOKIE_SECURE=False,  # True when HTTPS
+        REMEMBER_COOKIE_HTTPONLY=True
+    )    
 
     # Initialize extensions
     db.init_app(app)
+    migrate = Migrate()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
@@ -114,21 +119,41 @@ def create_app():
             if not book:
                 return jsonify({'error': 'Book not found'}), 404
             
-            # Here you would add the book to the user's cart in the database
-            # For now, we'll just return success
-            # In a real app, you would have a Cart model and add items to it
+            # Get or create active cart
+            cart = Order.query.filter_by(customer_id=current_user.customer_id, status='cart').first()
+            if not cart:
+                cart = Order(customer_id=current_user.customer_id, total_amount=0)
+                db.session.add(cart)
+                db.session.commit()  # commit to get cart_id
+
+            # Check if the item already exists in cart
+            item = OrderItem.query.filter_by(order_id=cart.order_id, book_id=book.book_id).first()
+            if item:
+                item.quantity += quantity
+            else:
+                item = OrderItem(order_id=cart.order_id, book_id=book.book_id, quantity=quantity, unit_price=book.price)
+                db.session.add(item)
+
+            # Recalculate cart total
+            total = sum(i.quantity * float(i.unit_price) for i in cart.items)
+            cart.total_amount = total
+
+            db.session.commit()
             
             return jsonify({
                 'success': True,
-                'message': f'Added {book.title} to cart',
+                'message': f'Added {quantity} x {book.title} to cart',
+                'cart_total': float(cart.total_amount),
                 'book': {
                     'id': book.book_id,
                     'title': book.title,
-                    'price': float(book.price)
+                    'price': float(book.price),
+                    'quantity': quantity
                 }
             })
             
         except Exception as e:
+            db.session.rollback()
             return jsonify({'error': str(e)}), 500
 
     @app.route('/api/cart/items')
@@ -136,13 +161,29 @@ def create_app():
     def api_cart_items():
         """Get cart items from database"""
         try:
-            # For now, return empty - in production, fetch from database
-            # cart_items = CartItem.query.filter_by(customer_id=current_user.customer_id).all()
-            
+            cart = Order.query.filter_by(customer_id=current_user.customer_id, status='cart').first()
+            if not cart:
+                return jsonify({'items': [], 'count': 0, 'subtotal': 0})
+
+            items_list = []
+            subtotal = 0
+
+            for item in cart.items:  # assuming Order has relationship: items = db.relationship('OrderItem', backref='order')
+                total_price = float(item.price) * item.quantity
+                subtotal += total_price
+                items_list.append({
+                    'order_item_id': item.order_item_id,
+                    'book_id': item.book.book_id,
+                    'title': item.book.title,
+                    'unit_price': float(item.unit_price),
+                    'quantity': item.quantity,
+                    'total_price': total_price
+                })
+
             return jsonify({
-                'items': [],
-                'count': 0,
-                'subtotal': 0
+                'items': items_list,
+                'count': sum(i['quantity'] for i in items_list),
+                'subtotal': subtotal
             })
             
         except Exception as e:
@@ -165,7 +206,7 @@ def create_app():
                 login_user(customer)
                 flash('Logged in successfully!', 'success')
                 next_page = request.args.get('next')
-                if not next_page or url_parse(next_page).netloc != '':
+                if not next_page: #or url_parse(next_page).netloc != '':
                     next_page = url_for('index')
                 return redirect(next_page)
             else:
