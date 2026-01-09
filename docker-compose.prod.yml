@@ -3,6 +3,7 @@ services:
     build:
       context: ./webapp
       dockerfile: Dockerfile.prod
+    container_name: flask-migrate
     env_file:
       - .env.migrate
     command: flask db upgrade
@@ -12,6 +13,7 @@ services:
     restart: "no"
   db:
     image: postgres:15-alpine
+    container_name: postgres-db
     env_file:
       - .env
     volumes:
@@ -28,6 +30,7 @@ services:
     build:
       context: ./webapp
       dockerfile: Dockerfile.prod
+    container_name: flask-app
     env_file:
       - .env.webapp
     environment:
@@ -44,6 +47,7 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
+    container_name: nginx-web
     depends_on:
       webapp:
         condition: service_started
